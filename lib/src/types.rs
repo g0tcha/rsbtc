@@ -1,5 +1,7 @@
 use crate::{
     crypto::{PublicKey, Signature},
+    sha256::Hash,
+    util::MerkleRoot,
     U256,
 };
 use chrono::{DateTime, Utc};
@@ -43,9 +45,9 @@ pub struct BlockHeader {
     /// Nonce used to mine the block
     pub nonce: u64,
     /// Hash of the previous block
-    pub prev_block_hash: [u8; 32],
+    pub prev_block_hash: Hash,
     /// Merkle root of the block's transactions
-    pub merkle_root: [u8; 32],
+    pub merkle_root: MerkleRoot,
     /// target
     pub target: U256,
 }
@@ -53,8 +55,8 @@ impl BlockHeader {
     pub fn new(
         timestamp: DateTime<Utc>,
         nonce: u64,
-        prev_block_hash: [u8; 32],
-        merkle_root: [u8; 32],
+        prev_block_hash: Hash,
+        merkle_root: MerkleRoot,
         target: U256,
     ) -> Self {
         BlockHeader {
@@ -87,13 +89,18 @@ impl Transaction {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct TransactionInput {
-    pub prev_transaction_output_hash: [u8; 32],
-    pub signature: Signature, // dummy types, will be replaced later
+    pub prev_transaction_output_hash: Hash,
+    pub signature: Signature,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct TransactionOutput {
     pub value: u64,
     pub unique_ud: Uuid,
-    pub pubkey: PublicKey, // dummy types, will be replaced later
+    pub pubkey: PublicKey,
+}
+impl TransactionOutput {
+    pub fn hash(&self) -> Hash {
+        Hash::hash(self)
+    }
 }
